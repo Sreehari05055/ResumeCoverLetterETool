@@ -13,9 +13,6 @@ from io import BytesIO
 from finalProject import settings
 from service.forms import RegisterForm, LoginForm
 from service.models import ChatHistory, CVStructure, CoverLetterStructure
-#from fpdf import FPDF
-import nltk
-nltk.download('punkt')
 
 openai.api_key = settings.OPENAI_API_KEY
 
@@ -27,13 +24,8 @@ def chat(request):
             uploaded_file = request.FILES.get("uploaded_file", None)
             formatted_user = escape(user_input)
 
-            #if "generate" in user_input.lower():
-            #    bot_response = gpt_prompt(user_input)
-            #    return JsonResponse({'bot_response': bot_response})
-
             if uploaded_file:
                 if uploaded_file.content_type == 'application/pdf':
-                    file_name = uploaded_file.name
 
                     file_content = uploaded_file.read()
                     file_to_pdf = BytesIO(file_content)
@@ -44,10 +36,6 @@ def chat(request):
                         data += page.extract_text() + "\n"
 
                     response_var = f"CV or Cover Letter: {data}\n\n User Query: {user_input}"
-
-                    #if "generate" in user_input.lower():
-                    #    bot_response = gpt_prompt(response_var)
-                    #    return JsonResponse({'bot_response': bot_response})
 
                     bot_response = response(response_var).replace("\n", "<br>")
 
@@ -137,64 +125,26 @@ def gpt_prompt(query):
         return f"Error with GPT: {str(e)}"
 
 
-
-
 def gpt_generic_prompt(cv_info, cl_info, query):
     try:
-        """if "generate" in query.lower():
-            prompt = (
-                f"Based on the following information for CV's:\n{cv_info},\n\n"
-                f"and based on the following information for Cover Letter's:\n{cl_info}\n\n"
-                f"Generate a CV or Cover Letter based on provided information and {query} with appropriate spacing. It should be completely professional and minimalistic."
-                f"EACH AND EVERY SECTION SHOULD BE MENTIONED CLEARLY"
-                f"DO NOT USE '*' or any other special characters to represent lists or points. Use full sentences or numbers instead."
-                f"When using numbers to represent points, write them with the number followed by a closing parenthesis and a space. Then write the corresponding point or statement."
-
-            )
-            raw_doc = chat_model(prompt)
-
-            key_sentence_pair = format_cv(raw_doc)
-
-            return key_sentence_pair
-            """
         prompt = (
             f"Based on the following information for CV's:\n{cv_info},\n\n"
             f"and based on the following information for Cover Letter's:\n{cl_info}\n\n"
             f"Answer the following query: {query}."
-            f"If they have uploaded their CV or Cover Letter Analyze it and provide suggestions for improvement."
-            f"If the current question is a follow-up to the previous question, incorporate that context into your response, "
-            f"focusing on the previous question's content. Otherwise, provide a general response, based on the database."
-            f"Begin by mentioning any necessary conditions or requirements before proceeding."
-            f"For each step, clearly describe the action and what the user should expect as a result of that step."
             f"DON'T use formal terms like 'position', 'section name', 'description', 'mandatory' but ensure you cover all steps and outcomes in a natural way."
             f"DO NOT USE '*' or any other special characters to represent lists or points. Use full sentences or numbers instead."
             f"When using numbers to represent points, write them with the number followed by a closing parenthesis and a space. Then write the corresponding point or statement."
             f"If the user's question is irrelevant or outside the provided information, kindly apologize and ask if they need help with something else."
+            f"If they have uploaded their CV or Cover Letter Analyze it, provide feedback with a rating, and suggest improvements."
+            f"If the current question is a follow-up to the previous question, incorporate that context into your response, "
+            f"focusing on the previous question's content. Otherwise, provide a general response, based on the database."
+            f"Begin by mentioning any necessary conditions or requirements before proceeding."
+            f"For each step, clearly describe the action and what the user should expect as a result of that step."
+
         )
         return chat_model(prompt)
     except Exception as e:
         return f"Error with GPT: {str(e)}"
-
-def format_cv(cv_text):
-
-    keywords = ["Professional Summary", "Education", "Relevant Work Experience", "Skills", "Projects", "Extra-Curricular Activities", "Interests", "References","Phone","Email","LinkedIn","GitHub"]
-
-    tokens = nltk.sent_tokenize(cv_text)
-
-    key_sentence_pair = {}
-    for keyword in keywords:
-        key_found = False
-        extracted_sentence = []
-        for sentence in tokens:
-            if key_found:
-                extracted_sentence.append(sentence)
-            if keyword in sentence:
-                key_found = True
-        key_sentence_pair[keyword] = " ".join(extracted_sentence)
-
-    for key,value in key_sentence_pair:
-        with open("gpt_response_form.txt", "w", encoding="utf-8") as file:
-            file.write(f"{key}:{value}")
 
 
 def chat_model(prompt):
