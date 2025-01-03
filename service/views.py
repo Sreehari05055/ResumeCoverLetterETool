@@ -21,36 +21,43 @@ def chat(request):
     try:
         if request.method == 'POST':
             user_input = request.POST.get('user_input')
-            uploaded_file = request.FILES.get("uploaded_file", None)
+            uploaded_file = request.FILES.getlist("uploaded_file")
             formatted_user = escape(user_input)
 
             if uploaded_file:
-                if uploaded_file.content_type == 'application/pdf':
 
-                    file_content = uploaded_file.read()
-                    file_to_pdf = BytesIO(file_content)
+                file_data = []
+                if len(uploaded_file) > 2:
+                    return JsonResponse({'error': 'Only a maximum of 2 PDF files are allowed at a time'})
 
-                    reader = PdfReader(file_to_pdf)
-                    data = ""
-                    for page in reader.pages:
-                        data += page.extract_text() + "\n"
+                for file in uploaded_file:
+                    if file.content_type == 'application/pdf':
 
-                    response_var = f"CV or Cover Letter: {data}\n\n User Query: {user_input}"
+                        file_content = file.read()
+                        file_to_pdf = BytesIO(file_content)
 
-                    bot_response = response(response_var).replace("\n", "<br>")
+                        reader = PdfReader(file_to_pdf)
+                        data = ""
+                        for page in reader.pages:
+                            data += page.extract_text() + "\n"
+                        file_data.append(f"File: {file.name}, Content: {data}")
 
-                    ChatHistory.objects.create(
-                        user=request.user,
-                        message=formatted_user,
-                        sender='user'
-                    )
+                response_var = "\n".join(file_data) + f"\n\n User Query: {user_input}"
 
-                    ChatHistory.objects.create(
-                        user=request.user,
-                        message=bot_response,
-                        sender='bot'
-                    )
-                    return JsonResponse({'bot_response': bot_response})
+                bot_response = response(response_var).replace("\n", "<br>")
+
+                ChatHistory.objects.create(
+                    user=request.user,
+                    message=formatted_user,
+                    sender='user'
+                )
+
+                ChatHistory.objects.create(
+                    user=request.user,
+                    message=bot_response,
+                    sender='bot'
+                )
+                return JsonResponse({'bot_response': bot_response})
 
             else:
 
@@ -134,6 +141,7 @@ def gpt_generic_prompt(cv_info, cl_info, query):
             f"DON'T use formal terms like 'position', 'section name', 'description', 'mandatory' but ensure you cover all steps and outcomes in a natural way."
             f"DO NOT USE '*' or any other special characters to represent lists or points. Use full sentences or numbers instead."
             f"When using numbers to represent points, write them with the number followed by a closing parenthesis and a space. Then write the corresponding point or statement."
+            f"If the user greets you with 'hi', 'hello', or something similar, respond warmly without mentioning all the information in the prompt."
             f"If the user's question is irrelevant or outside the provided information, kindly apologize and ask if they need help with something else."
             f"If they have uploaded their CV or Cover Letter Analyze it, provide feedback with a rating, and suggest improvements."
             f"If the current question is a follow-up to the previous question, incorporate that context into your response, "
@@ -164,7 +172,6 @@ def chat_model(prompt):
 
     except Exception as e:
         return f"Error with GPT: {str(e)}"
-
 
 def clear_chat(request):
     if request.method == 'POST':

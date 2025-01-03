@@ -42,17 +42,19 @@
 
         const formData = new FormData();
 
-        if (fileInput.files[0]) {
-        formData.append('uploaded_file', fileInput.files[0]);
-    }
-        if(userMessage || fileInput.files[0])
+        for (const file of fileInput.files)  {
+        formData.append('uploaded_file', file);
+        }
+        if(userMessage || (fileInput.files.length > 0  && fileInput.files.length < 3))
         {
-         if ((fileInput.files[0]) && (userMessage)) {
+         if ((fileInput.files.length > 0 && fileInput.files.length < 3) && (userMessage)) {
+            const sortFileName = Array.from(fileInput.files).map(file => file.name).join(', ');
+
             const userBubble = document.createElement('div');
             userBubble.classList.add('chat-bubble', 'user-bubble');
-            userBubble.textContent =`Uploaded file: ${fileInput.files[0].name}\n${userMessage}`
+            userBubble.textContent =`Uploaded files: ${sortFileName}\n${userMessage}`
             chatBox.appendChild(userBubble);
-            formData.append('user_input', `Uploaded file: ${fileInput.files[0].name}\n${userMessage}`);
+            formData.append('user_input', `Uploaded files: ${sortFileName}\n${userMessage}`);
          }
          else if (userMessage){
             // Add user message to chat
@@ -75,6 +77,13 @@
             })
              .then(response => response.json())
             .then(data => {
+             if (data.error) {
+                const errorMessage = document.createElement('div');
+                errorMessage.classList.add('chat-bubble', 'bot-bubble');
+                errorMessage.textContent = data.error; // Display error message
+                chatBox.appendChild(errorMessage);
+             }
+             else{
                 const botBubble = document.createElement('div');
                 botBubble.classList.add('chat-bubble', 'bot-bubble');
                 chatBox.appendChild(botBubble);
@@ -86,13 +95,14 @@
                 typeText(botBubble, sentences);
 
                 scrollToBottom();
+                }
 
         })
         .catch(error => {
                 console.error('Error fetching bot response:', error);
             }).finally(() => {
 
-            // enable submit button after the response is processed
+            // Re-enable the submit button after the response is processed
             submitButton.style.opacity = "1";
             submitButton.disabled = false;
 
