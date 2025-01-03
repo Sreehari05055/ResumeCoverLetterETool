@@ -1,4 +1,4 @@
-# Django Project: Resume & Cover Letter Enhancement Tool
+# Resume & Cover Letter Enhancement Tool
 
 **Live Project:** [View the application here](https://c366sree.pythonanywhere.com/)
 
