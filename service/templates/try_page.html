@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+
+     {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bulma.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0">
+</head>
+<body class="hero is-fullheight"  style="background-color: #a3adb9;">
+
+    <nav class="navbar is-light">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="{% url 'advert' %}">
+                 <img src="{% static 'images/logo-transparent-png.png' %}" alt="SA" class="brand-logo">
+            </a>
+        </div>
+        <div class="navbar-menu">
+
+            <div class="navbar-end">
+                <a class="navbar-item has-text-weight-bold" href="{% url 'register' %}">Register</a>
+            </div>
+        </div>
+    </nav>
+
+   <div id="chat-box" class="box chat-container"  style="height: 50vh; overflow-y: auto;" >
+
+     <form method="POST" id="chat-form" class="input-form" enctype="multipart/form-data">
+  {% csrf_token %}
+         <div class="control">
+             <label for="file-upload" class="button is-info is-outlined is-small" style="background-color: #6d7984; color: #f0f3f5; border-radius: 50%; width: 40px; height: 40px; border: 1px solid #6d7984;">
+                <span class="icon is-small"><i class="fas fa-plus"></i></span>
+             </label>
+             <input type="file" id="file-upload" name="uploaded_file" multiple accept=".pdf" style="display: none;" onchange="alert('File Uploaded Successfully');">
+             </div>
+     <textarea id="question" name="user_input" placeholder="Ask any questions regarding your CV or cover letter." required style="resize: none; width: 100%;" oninput="toggleSubmitButton()"></textarea>
+        <button type="submit" id="submit-btn" class="button is-info is-outlined is-small" style="background-color: #636363; color: #ffd700; border: none; border-radius: 50%; width: 40px; height: 40px; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;">→</button>
+      </form>
+    </div>
+
+
+<footer class="footer custom-footer">
+  <div class="content has-text-centered">
+     <p>&copy 2025 SA. All rights reserved.</p>
+  </div>
+</footer>
+
+    <script>
+      const botResponseUrl = "{% url 'demo' %}";</script>
+ <script src="{% static 'javascript/homepage.js' %}" defer>
+ </script>
+</body>
+</html>

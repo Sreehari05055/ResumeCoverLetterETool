@@ -86,6 +86,49 @@ def chat(request):
         return JsonResponse({'error': 'Something went wrong'}, status=500)
 
 
+def demo(request):
+    try:
+        if request.method == 'POST':
+            user_input = request.POST.get('user_input')
+            uploaded_file = request.FILES.getlist("uploaded_file")
+
+            if uploaded_file:
+
+                file_data = []
+                if len(uploaded_file) > 2:
+                    return JsonResponse({'error': 'Only a maximum of 2 PDF files are allowed at a time'})
+
+                for file in uploaded_file:
+                    if file.content_type == 'application/pdf':
+
+                        file_content = file.read()
+                        file_to_pdf = BytesIO(file_content)
+
+                        reader = PdfReader(file_to_pdf)
+                        data = ""
+                        for page in reader.pages:
+                            data += page.extract_text() + "\n"
+                        file_data.append(f"File: {file.name}, Content: {data}")
+
+                response_var = "\n".join(file_data) + f"\n\n User Query: {user_input}"
+
+                bot_response = response(response_var).replace("\n", "<br>")
+
+                return JsonResponse({'bot_response': bot_response})
+
+            else:
+
+                formatted_user = escape(user_input)
+                bot_response = response(formatted_user).replace("\n", "<br>")
+
+                return JsonResponse({'bot_response': bot_response})
+
+        return render(request, 'try_page.html')
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return JsonResponse({'error': 'Something went wrong'}, status=500)
+
 def advert(request):
     return render(request, 'advert.html')
 

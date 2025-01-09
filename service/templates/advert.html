@@ -12,11 +12,12 @@
 
     <nav class="navbar is-light">
         <div class="navbar-brand">
-            <a class="navbar-item" href="#">
+            <a class="navbar-item" href="{% url 'advert' %}">
                  <img src="{% static 'images/logo-transparent-png.png' %}" alt="SA" class="brand-logo">
             </a>
         </div>
         <div class="navbar-end">
+            <a class="navbar-item has-text-weight-bold has-text-grey-darker" href="{% url 'demo' %}">Try It First</a>
             <a class="navbar-item has-text-weight-bold has-text-grey-darker" href="{% url 'login' %}">Login</a>
             <a class="navbar-item has-text-weight-bold has-text-grey-darker" href="{% url 'register' %}">Register</a>
         </div>
@@ -29,9 +30,9 @@
                     <aside class="menu" style="position: fixed; top: 37%; left: 5%;">
                         <p class="menu-label" style="color: #000;">Navigation</p>
                         <ul class="menu-list">
-                            <li><a href="#Overview" >Overview</a></li>
-                            <li><a href="#how-it-works">How It Works</a></li>
-                            <li><a href="#features" >Features</a></li>
+                            <li><a href="#Overview" onclick="showSection('Overview')">Overview</a></li>
+                            <li><a href="#how-it-works" onclick="showSection('how-it-works')">How It Works</a></li>
+                            <li><a href="#features" onclick="showSection('features')">Features</a></li>
                         </ul>
                     </aside>
                 </div>
@@ -76,6 +77,24 @@
       </p>
   </div>
 </footer>
+ <script>
+        // Function to show the clicked section and hide others
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
 
+            // Show the selected section
+            const sectionToShow = document.getElementById(sectionId);
+            sectionToShow.style.display = 'block';
+        }
+
+        // Default to show 'Overview' on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            showSection('Overview');
+        });
+    </script>
 </body>
 </html>

@@ -24,6 +24,7 @@ urlpatterns = [
     path('login/', views.login_user, name='login'),
     path('admin/', admin.site.urls),
     path('chat/', views.chat, name='chat'),
+    path('demo/', views.demo, name='demo'),
     path('', views.advert, name='advert'),
     path('register/', views.register, name='register'),
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='reset_password'),
