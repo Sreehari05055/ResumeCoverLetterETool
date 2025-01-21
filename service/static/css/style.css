@@ -129,6 +129,12 @@ h2{
 .content-section:target {
     display: block; /* Display targeted section */
 }
+.password-reset{
+    color:  #d4d8da;
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+}
 .brand-logo {
     width: 100px;
     height: 100px;
